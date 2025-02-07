@@ -7,5 +7,15 @@ const pool = mysql.createPool({
     database: 'educational_management_system',
 });
 
+// 链接数据库成功
+pool.getConnection((err, connection) => {
+    if (err) {
+        console.log('链接数据库失败');
+        return;
+    }
+    console.log('链接数据库成功');
+    connection.release();
+})
+
 // 导出
 module.exports = pool;
