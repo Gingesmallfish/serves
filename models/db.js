@@ -17,4 +17,5 @@ connection.connect((err) => {
 });
 
 
+// 导出数据库连接对象
 module.exports = connection;

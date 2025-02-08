@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { getCaptcha } = require('../utils/captcha');
-const connection = require('../config/db');
+const connection = require('../models/db');
 
 const JWT_SECRET = 'token-admin';
 
@@ -15,7 +15,6 @@ exports.getCaptcha = (req, res) => {
   console.log(req.session.captcha)
 };
 
-// 注册用户
 // 注册用户
 exports.register = (req, res) => {
   const { username, password, confirmPassword, role, captcha } = req.body;
@@ -93,15 +92,45 @@ exports.register = (req, res) => {
 };
 // 登录用户
 exports.login = (req, res) => {
-  const { username, password } = req.body;
+  const {username, password, captcha} = req.body;
+
+  console.log('Received login data:', req.body); // 添加日志输出
+
+  // 验证用户名、密码、验证码是否一致
+  if (!username || !password || !captcha) {
+    console.log('Missing required fields'); // 添加日志输出
+    return res.status(400).json({message: '所有字段都是必填项'});
+  }
+
+  // 验证验证码
+  if (!req.session.captcha || !req.session.captchaTime) {
+    console.log('Captcha or captcha time is missing in session'); // 添加日志输出
+    return res.status(400).json({message: '验证码已过期或无效'});
+  }
+
+  const captchaTime = req.session.captchaTime;
+  const currentTime = Date.now();
+  const twoMinutes = 10 * 60 * 1000; // 验证码有效时间为2分钟
+
+  if (currentTime - captchaTime > twoMinutes) {
+    console.log('Captcha has expired'); // 添加日志输出
+    return res.status(400).json({message: '验证码已过期'});
+  }
+
+  if (req.session.captcha !== captcha) {
+    console.log('Captcha does not match'); // 添加日志输出
+    return res.status(400).json({message: '验证码错误'});
+  }
 
   // 检查用户名是否存在
   const query = 'SELECT * FROM users WHERE username = ?';
   connection.query(query, [username], (err, results) => {
     if (err) {
+      console.error('Database error:', err); // 添加详细错误日志
       return res.status(500).json({ message: '服务器内部错误' });
     }
     if (results.length === 0) {
+      console.log('Username or password is incorrect'); // 添加日志输出
       return res.status(401).json({ message: '用户名或密码错误' });
     }
 
@@ -110,9 +139,11 @@ exports.login = (req, res) => {
     // 解密密码并验证
     bcrypt.compare(password, user.password, (err, isMatch) => {
       if (err) {
+        console.error('Password comparison error:', err); // 添加详细错误日志
         return res.status(500).json({ message: '服务器内部错误' });
       }
       if (!isMatch) {
+        console.log('Username or password is incorrect'); // 添加日志输出
         return res.status(401).json({ message: '用户名或密码错误' });
       }
 
@@ -121,7 +152,21 @@ exports.login = (req, res) => {
         expiresIn: '1h' // 令牌有效期为1小时
       });
 
+      console.log('Login successful'); // 添加日志输出
       res.json({ message: '登录成功', token });
     });
+  });
+};
+
+// 退出登录，删除token
+exports.logout = (req, res) => {
+  // 清除客户端的token
+  res.clearCookie('token');
+  // 清除服务器的token
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({ message: '服务器内部错误' });
+    }
+    res.json({ message: '退出登录成功' });
   });
 };

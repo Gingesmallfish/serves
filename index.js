@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const UserRouter = require('./router/userRouters');
 // 引入数据库
-require('./config/db')
+require('./models/db')
 
 
 const app = express();
@@ -36,7 +36,6 @@ app.use(session({
 app.use(express.static(path.join(__dirname, 'public')));
 // 挂载路由
 app.use('/api', UserRouter);
-
 
 // 启动服务器
 const port = 3000
