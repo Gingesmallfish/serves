@@ -1,6 +1,5 @@
 const express = require('express')
 const router = express.Router()
-const connection = require('../models/db');
 const { getCaptcha, register, login, logout} = require('../controller/UserController'); // 引入 UserController
 
 // 获取验证码接口
