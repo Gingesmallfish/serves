@@ -1,24 +1,42 @@
-const express = require('express')
-const session = require('express-session')
-const cors = require('cors')
-const app = express()
+const express = require('express');
+const cors = require('cors');
+const session = require('express-session');
+const bodyParser = require('body-parser');
+const path = require('path');
+const UserRouter = require('./router/userRouters');
+// 引入数据库
+require('./config/db')
 
-app.use(express.json());
-app.use(cors({
-    origin: 'http://localhost:8080',  // 前端项目地址
-    credentials: true
-}));
 
-app.use(express.urlencoded({extended: true}));
+const app = express();
+app.use(cors(
+    {
+        origin: 'http://localhost:8080',
+        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+        credentials: true,
+        allowedHeaders: ['Content-Type', 'Authorization'],
+    }
+));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 app.use(session({
-    secret: 'your_session_secret',
+    secret: 'secretKey',
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false }
+    cookie: {
+        secure: false,
+        // 十分钟
+        maxAge: 1000 * 60 * 10,
+    }
 }));
 
 
+// 静态文件
+app.use(express.static(path.join(__dirname, 'public')));
 // 挂载路由
+app.use('/api', UserRouter);
+
 
 // 启动服务器
 const port = 3000
