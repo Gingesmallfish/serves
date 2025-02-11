@@ -6,9 +6,9 @@ const getCaptcha = () => {
         ignoreChars: '0o1i',
         noise: 3,
         color: true,
-        width: 100,
+        width: 150, // 增大宽度
         height: 40,
-        // 背景
+        background: '#f0f0f0', // 设置背景颜色
 
     });
     return {

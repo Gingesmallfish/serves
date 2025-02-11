@@ -28,3 +28,6 @@ project/
 ├── utils/          # 工具函数
 │   ├── xxx.js
 └── index.js          # 主应用文件
+
+
+端口被占用
