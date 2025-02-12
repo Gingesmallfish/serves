@@ -7,7 +7,7 @@ const getCaptcha = () => {
         noise: 3,
         color: true,
         width: 150, // 增大宽度
-        height: 40,
+        height: 50,
         background: '#f0f0f0', // 设置背景颜色
 
     });

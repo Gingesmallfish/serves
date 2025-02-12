@@ -31,3 +31,7 @@ project/
 
 
 端口被占用
+netstat -ano|findstr "端口号"
+
+删除被占用的端口
+taskkill /f /t /im 

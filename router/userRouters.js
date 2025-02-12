@@ -12,7 +12,7 @@ router.post('/register', register);
 router.post('/login', login);
 
 // 退出
-router.post('/logout', logout);
+router.get('/logout', logout);
 
 
 // 记录日志接口
